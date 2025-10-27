@@ -383,6 +383,89 @@
         .custom-note-section {
             margin-top: 15px;
         }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal h3 {
+            margin: 0 0 15px 0;
+            color: #e74c3c;
+            font-size: 1.5rem;
+        }
+
+        .modal p {
+            margin: 0 0 25px 0;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .modal-btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .modal-btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .modal-btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #7f8c8d;
+        }
     </style>
 </head>
 <body>
@@ -420,6 +503,17 @@
             </div>
 
             <div id="testSections"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h3>⚠️ Dikkat!</h3>
+            <p>Tüm test verilerini silmek istediğinizden emin misiniz?<br><strong>Bu işlem geri alınamaz.</strong></p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-danger" onclick="confirmClearData()">🗑️ Evet, Sil</button>
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal()">❌ İptal</button>
+            </div>
         </div>
     </div>
 
@@ -685,12 +779,44 @@
         }
 
         function clearAllData() {
-            if (confirm('Tüm test verilerini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
-                testData = {};
-                initializeData();
-                renderTestSections();
-                showToast('Tüm veriler temizlendi! 🗑️', 'success');
-            }
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('show');
+        }
+
+        function confirmClearData() {
+            // Clear localStorage first
+            localStorage.removeItem('wroTestData');
+            
+            // Reset testData completely
+            testData = {};
+            
+            // Initialize fresh data structure
+            colors.forEach(color => {
+                testData[color.key] = {};
+                targetColors.forEach(target => {
+                    if (target !== color.name) {
+                        testData[color.key][target.toLowerCase()] = {
+                            dropped: false,
+                            reached: false,
+                            errors: {},
+                            customNotes: ''
+                        };
+                    }
+                });
+            });
+            
+            // Save the fresh empty data
+            saveToStorage();
+            
+            // Re-render everything
+            renderTestSections();
+            closeModal();
+            showToast('Tüm veriler temizlendi! 🗑️', 'success');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('show');
         }
 
         function showToast(message, type) {
@@ -712,5 +838,5 @@
             renderTestSections();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99519af143eae116',t:'MTc2MTU2MTk0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9951a004d05ae116',t:'MTc2MTU2MjE0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
